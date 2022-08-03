@@ -1,0 +1,194 @@
+
+public class Principal {
+    
+    public static void main(String[]args){
+        
+        PessoaJuridica lojaDoBairro= new PessoaJuridica();
+        lojaDoBairro.setNome("Loja do Bairro");
+        lojaDoBairro.setCnpj("2346457878799");
+        PessoaFisica joao = new PessoaFisica();
+        joao.setNome("Joao");
+        joao.setCpf("453647875");
+        joao.setDataNascimento("15/11/1999");
+        
+        
+        Divida divida = new Divida(joao, lojaDoBairro, 1000.00);
+        AcordoDivida acordoDivida = new AcordoDivida(divida,FormaDePagamento.BOLETO );
+        System.out.println("#######Dados do Devedor:");
+        System.out.println("Nome:"+acordoDivida.getDivida().getDevedora().getNome());
+        System.out.println("Data Nascimento:"+acordoDivida.getDivida().getDevedora().getDataFormatado());
+        System.out.println("Documento:"+acordoDivida.getDivida().getDevedora().getDocumento());
+        System.out.println("#######Dados do Cobrador:");
+        System.out.println("Nome:"+acordoDivida.getDivida().getCobradora().getNome());
+        System.out.println("Documento:"+acordoDivida.getDivida().getCobradora().getDocumento());
+        System.out.println("Valor da Divida: "+acordoDivida.getDivida().getValorDivida());
+        System.out.println("Forma de pagamento: "+acordoDivida.getFormaDePagamento().name());
+        System.out.println("Valor total: "+acordoDivida.getValorTotal());
+        
+    }
+    
+
+}
+
+public class PessoaJuridica extends Pessoa {
+    private String cnpj;
+   
+    public PessoaJuridica(){
+        
+    }
+    public String getCnpj() {
+        return cnpj;
+    }
+
+    public void setCnpj(String cnpj) {
+        this.cnpj = cnpj;
+    }
+
+    @Override
+    public String getDocumento() {
+        return this.getCnpj();
+    }
+
+    @Override
+    public String getDataFormatado() {
+        return "Informação não pertinente";
+    
+
+}
+}
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+
+public class PessoaFisica extends Pessoa {
+    private String cpf;
+    private LocalDate dataNascimento;
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public LocalDate getDataNascimento() {
+        return dataNascimento;
+    }
+
+    public void setDataNascimento(String dataNascimento) {
+        this.dataNascimento = LocalDate.parse(dataNascimento, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
+    @Override
+    public String getDocumento() {
+        return this.getCpf();
+    }
+
+    @Override
+    public String getDataFormatado() {
+        return this.dataNascimento.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        
+    }
+    
+    
+}
+
+
+
+public abstract class Pessoa {
+    private String nome;  
+    
+    public void setNome(String nome){
+        this.nome=nome.toUpperCase();
+    }
+        public String getNome(){
+            return this.nome;
+        }
+        
+        public abstract String getDocumento();
+        public abstract String getDataFormatado();
+    }
+
+public enum FormaDePagamento {
+    DEBITO, CREDITO, BOLETO;
+    
+    
+    }
+    
+public class Divida {
+    private final Pessoa devedora;
+    private final Pessoa cobradora;
+    private final Double valorDivida;
+    
+    public Divida(Pessoa devedora, Pessoa cobradora, double valorDivida){
+        this.devedora=devedora;
+        this.cobradora =cobradora;
+        this.valorDivida = valorDivida;
+        
+    }
+
+    public Pessoa getDevedora() {
+        return devedora;
+    }
+
+    public Pessoa getCobradora() {
+        return cobradora;
+    }
+
+    public Double getValorDivida() {
+        return valorDivida;
+    }
+    
+}
+
+public class AcordoDivida {
+    private Divida divida;
+    private FormaDePagamento formaDePagamento;
+    private Double valorTotal;
+
+    public AcordoDivida(Divida divida, FormaDePagamento formaDePagamento) {
+        this.divida = divida;
+        this.setFormaDePagamento(formaDePagamento);
+    }
+
+    public Divida getDivida() {
+        return divida;
+    }
+
+    public FormaDePagamento getFormaDePagamento() {
+        return formaDePagamento;
+    }
+
+    public void setFormaDePagamento(FormaDePagamento formaDePagamento) {
+        this.formaDePagamento = formaDePagamento;
+        setValorTotal();
+        
+    }
+
+    private void setValorTotal() {
+        if(this.formaDePagamento.equals(FormaDePagamento.CREDITO)){
+           this.valorTotal = this.divida.getValorDivida() * (1+ 0.15);
+        }else if(this.formaDePagamento.equals(FormaDePagamento.BOLETO)){
+            this.valorTotal = this.divida.getValorDivida()* (1+ 0.10);           
+        }else if(this.formaDePagamento.equals(FormaDePagamento.BOLETO)){
+            this.valorTotal = this.divida.getValorDivida() +(1+ 0.05);
+        }else this.valorTotal = this.divida.getValorDivida()*(1+ 0.05);
+    }
+    
+    
+
+    public Double getValorTotal() {
+        return valorTotal;
+    }
+
+}
+
+
+
+
+
+
+
+
